@@ -19,12 +19,12 @@ To incorporate this in your own project, try adding it as a git submodule.
 
 You should now have the code present.  Give it a shot!  In your Python project, import the ApiHelper class and instantiate an object.  For example:
 
-`
+```
 from apihelper import ApiHelper, BearerAuth
 
 with ApiHelper(auth=BearerAuth(token="your API token here")) as var_name:
     result = var_name.get(url='https://example.com')
-`
+```
 
 The class supports all 'requests' methods available at time of this writing, including:
 - get
@@ -42,12 +42,12 @@ Currently, two parameters are supported:
 ## baseurl:
 'baseurl' creates an HTTP session object with the specified URL as the base.  Any subsequent requests will be relative to the base.  For example:
 
-`
+```
 from apihelper import ApiHelper
 
 with ApiHelper(baseurl="https://example.com") as var_name:
     result = var_name.get(url="/some/relative/url/here")
-`
+```
 This may be useful if you need to repeatedly contact the same host but with different content locations
 
 ## auth:
