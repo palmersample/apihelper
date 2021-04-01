@@ -7,7 +7,7 @@ features.
 import logging
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util.retry import Retry
 from requests_toolbelt import sessions
 import urllib3.exceptions
 
@@ -31,18 +31,23 @@ REQUEST_TIMEOUT = 5  # Seconds
 #           redirection loops
 #
 # backoff_factor: Specifies the multiplier used during graceful retry attempts
-#                 calculated as {backoff factor} * (2 ^ ({retry attempt} - 1))
-#                 The MINIMUM value here should be 1 as zero would result in
-#                 no backoff timer.  For example:
-#                 Using 1 results in sleeps of 0.5, 1, 2, 4, 8, 16 ... seconds
-#                 between each successive retry
+#                 calculated as:
+#                 {backoff factor} * (2 ** ({number of total retries} - 1))
+#
+#                 For example, with a backoff factor of 1, retries will be
+#                 0.5, 1, 2, 4, 8, 16 ... seconds between the next retry.
+#                 I'm arbitrarily using 0.3, which results in a delay of:
+#                 150, 300, 600, 1200, 2400 ... milliseconds.
 #
 # status_forcelist: The list of HTTP response codes which will result in a
 #                   retry.
 #
-# method_whitelist: HTTP methods which will be retried.  The strategy here
-#                   include all HTTP methods (even POST).  Should be safe
-#                   to leave as-is, but modify as desired for your use case.
+# allowed_methods: HTTP methods which will be retried.  The strategy here
+#                  include all HTTP methods (even POST).  Should be safe
+#                  to leave as-is, but modify as desired for your use case.
+#
+# respect_retry_after_header: Well, if the server says to wait, let's be a
+#                             good citizen and wait...
 #
 # More info may be found at the urllib3 documentation site - current at time
 # of code creation is:
@@ -51,11 +56,12 @@ REQUEST_TIMEOUT = 5  # Seconds
 default_retry_strategy = Retry(
     total=3,
     redirect=16,
-    backoff_factor=1,
+    backoff_factor=0.3,
     status_forcelist=[429, 500, 502, 503, 504],
-    method_whitelist=[
+    allowed_methods=[
         "HEAD", "GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS", "TRACE"
-    ]
+    ],
+    respect_retry_after_header=True
 )
 
 
